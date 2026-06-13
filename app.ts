@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import cors from "cors";
 import { createServer } from "http";
 import { QuestionController } from "./controllers/question.controller";
 
@@ -10,7 +11,13 @@ export class App {
     this.app = express();
     this.httpServer = createServer(this.app);
     this.questionController = new QuestionController();
+    this.config();
     this.routes();
+  }
+
+  private config() {
+    this.app.use(cors({}));
+    this.app.use(express.json());
   }
 
   private routes(): void {
