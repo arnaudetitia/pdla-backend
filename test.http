@@ -1,0 +1,3 @@
+### Récupération des questions 
+GET http://localhost:3030/questions
+Content-Type: application/json
