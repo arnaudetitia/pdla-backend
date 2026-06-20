@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 import { QuestionController } from "./controllers/question.controller";
+import { ErreurImportFichier } from "./models/erreur-import-fichier.model";
 
 export class App {
   app: Application;
@@ -89,7 +90,7 @@ export class App {
       },
     );
 
-    this.app.post(
+    this.app.put(
       "/questions/:id",
       this.upload.single("musicFile"),
       async (req, res) => {
@@ -119,6 +120,34 @@ export class App {
         }
       },
     );
+
+    this.app.post("/questions/import", async (req, res) => {
+      try {
+        const csvContent = req.body.csvFileContent;
+        const doImport = req.body.doImport;
+        let erreurs: ErreurImportFichier[] = [];
+        erreurs = await this.questionController.importQuestions(
+          csvContent,
+          doImport,
+        );
+        if (erreurs.length > 0) {
+          res.json({ erreurs, questions: [] });
+        } else {
+          const allQuestions = await this.questionController.getAllQuestions();
+          const allQuestionsReturn = allQuestions.map((q) => {
+            return {
+              ...q,
+              id: Number.parseInt(q.id),
+              annee: Number.parseInt(q.annee),
+            };
+          });
+          res.json({ erreurs: [], questions: allQuestionsReturn });
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'import des questions:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
   }
 
   public listen(port: number): void {
