@@ -1,3 +1,7 @@
 ### Récupération des questions 
 GET http://localhost:3030/questions
 Content-Type: application/json
+
+### Récupération des parties 
+GET http://localhost:3030/parties
+Content-Type: application/json
