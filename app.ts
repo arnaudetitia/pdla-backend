@@ -4,10 +4,12 @@ import path from "path";
 import { createServer } from "http";
 import { QuestionController } from "./controllers/question.controller";
 import { ErreurImportFichier } from "./models/erreur-import-fichier.model";
+import { PartieController } from "./controllers/partie.controller";
 
 export class App {
   app: Application;
   questionController: QuestionController;
+  partieController: PartieController;
   httpServer: any;
   upload: any;
 
@@ -15,6 +17,7 @@ export class App {
     this.app = express();
     this.httpServer = createServer(this.app);
     this.questionController = new QuestionController();
+    this.partieController = new PartieController();
     this.config();
     this.configureStorage();
     this.routes();
@@ -45,6 +48,7 @@ export class App {
   }
 
   private routes(): void {
+    // QUESTIONS
     this.app.get("/questions", async (req, res) => {
       try {
         const allQuestions = await this.questionController.getAllQuestions();
@@ -145,6 +149,45 @@ export class App {
         }
       } catch (error) {
         console.error("Erreur lors de l'import des questions:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    // PARTIES
+    this.app.get("/parties", async (req, res) => {
+      try {
+        const allParties = await this.partieController.getAllParties();
+        res.json(
+          allParties.map((partie) => {
+            return {
+              id: Number.parseInt(partie.id),
+              nom_partie: partie.nom_partie,
+              liste_questions: partie.liste_questions,
+            };
+          }),
+        );
+      } catch (error) {
+        console.error("Erreur lors de la récupération des parties:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    this.app.post("/parties", async (req, res) => {
+      try {
+        const newPartie = JSON.parse(req.body.partie);
+        await this.partieController.createNewPartie(newPartie);
+        const allParties = await this.partieController.getAllParties();
+        res.json(
+          allParties.map((partie) => {
+            return {
+              id: Number.parseInt(partie.id),
+              nom_partie: partie.nom_partie,
+              liste_questions: partie.liste_questions,
+            };
+          }),
+        );
+      } catch (error) {
+        console.error("Erreur lors de la création d'une partie:", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
