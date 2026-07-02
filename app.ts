@@ -5,11 +5,13 @@ import { createServer } from "http";
 import { QuestionController } from "./controllers/question.controller";
 import { ErreurImportFichier } from "./models/erreur-import-fichier.model";
 import { PartieController } from "./controllers/partie.controller";
+import { EquipeController } from "./controllers/equipe.controller";
 
 export class App {
   app: Application;
   questionController: QuestionController;
   partieController: PartieController;
+  equipeController: EquipeController;
   httpServer: any;
   upload: any;
 
@@ -18,6 +20,7 @@ export class App {
     this.httpServer = createServer(this.app);
     this.questionController = new QuestionController();
     this.partieController = new PartieController();
+    this.equipeController = new EquipeController();
     this.config();
     this.configureStorage();
     this.routes();
@@ -188,6 +191,18 @@ export class App {
         );
       } catch (error) {
         console.error("Erreur lors de la création d'une partie:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    //EQUIPES
+    this.app.post("/equipes", async (req, res) => {
+      try {
+        const equipes = JSON.parse(req.body.equipes);
+        await this.equipeController.enregistrerEquipes(equipes);
+        res.json();
+      } catch (error) {
+        console.error("Erreur lors de l'enregistrement des équipes :", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
