@@ -175,6 +175,25 @@ export class App {
       }
     });
 
+    this.app.get("/parties/:id", async (req, res) => {
+      try {
+        const idPartie = Number.parseInt(req.params.id);
+        const questionsPartie =
+          await this.partieController.getPartieById(idPartie);
+        res.json(
+          questionsPartie.map((question) => {
+            return {
+              ...question,
+              annee: Number.parseInt(question.annee),
+            };
+          }),
+        );
+      } catch (error) {
+        console.error("Erreur lors de la récupération de la partie:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
     this.app.post("/parties", async (req, res) => {
       try {
         const newPartie = JSON.parse(req.body.partie);

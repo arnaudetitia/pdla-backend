@@ -5,3 +5,7 @@ Content-Type: application/json
 ### Récupération des parties 
 GET http://localhost:3030/parties
 Content-Type: application/json
+
+### Récupération d'une partie
+GET http://localhost:3030/parties/1
+Content-Type: application/json
