@@ -30,4 +30,26 @@ export class PartieController {
       values: [partie.nomPartie, partie.idsQuestions],
     });
   }
+
+  public async getPartieById(idPartie: number) {
+    const pool = database.Database.getPool();
+    const result = await pool.query({
+      text: `
+                SELECT 
+                    q.question,
+                    q.annee,
+                    q.image,
+                    q.musique
+                    FROM pdla.questions q
+                    WHERE q.id IN (
+                      SELECT UNNEST(p.ids_questions) 
+                      FROM pdla.parties p
+                      WHERE p.id = $1
+                    )
+                    ORDER BY q.id
+                `,
+      values: [idPartie],
+    });
+    return result.rows;
+  }
 }
