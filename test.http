@@ -9,3 +9,7 @@ Content-Type: application/json
 ### Récupération d'une partie
 GET http://localhost:3030/parties/1
 Content-Type: application/json
+
+### Récupération des équipes
+GET http://localhost:3030/equipes
+Content-Type: application/json
