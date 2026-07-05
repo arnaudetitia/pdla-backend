@@ -20,6 +20,22 @@ export class EquipeController {
       await pool.query("COMMIT");
     } catch (error) {
       await pool.query("ROLLBACK");
+      throw error;
+    }
+  }
+
+  public async getAllEquipes() {
+    const pool = database.Database.getPool();
+    try {
+      const result = await pool.query(
+        `
+        SELECT e.nom_equipe,e.connected
+        FROM pdla.equipes e
+        `,
+      );
+      return result.rows;
+    } catch (error) {
+      throw error;
     }
   }
 }

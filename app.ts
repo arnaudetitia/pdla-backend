@@ -215,6 +215,16 @@ export class App {
     });
 
     //EQUIPES
+    this.app.get("/equipes", async (req, res) => {
+      try {
+        const equipes = await this.equipeController.getAllEquipes();
+        res.json(equipes);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des équipes :", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
     this.app.post("/equipes", async (req, res) => {
       try {
         const equipes = JSON.parse(req.body.equipes);
