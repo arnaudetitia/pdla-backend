@@ -235,6 +235,17 @@ export class App {
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
+
+    this.app.put("/equipes/connect", async (req, res) => {
+      try {
+        const equipe = JSON.parse(req.body.equipe);
+        await this.equipeController.connectEquipe(equipe);
+        res.json(true);
+      } catch (error) {
+        console.error("Erreur lors de la connexion de l'équipe :", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
   }
 
   public listen(port: number): void {
