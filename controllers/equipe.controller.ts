@@ -38,4 +38,21 @@ export class EquipeController {
       throw error;
     }
   }
+
+  public async connectEquipe(nomEquipe: string) {
+    const pool = database.Database.getPool();
+    try {
+      const result = await pool.query({
+        text: `
+       UPDATE pdla.equipes
+       SET connected = true
+       WHERE nom_equipe = $1
+        `,
+        values: [nomEquipe],
+      });
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
