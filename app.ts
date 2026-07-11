@@ -6,6 +6,7 @@ import { QuestionController } from "./controllers/question.controller";
 import { ErreurImportFichier } from "./models/erreur-import-fichier.model";
 import { PartieController } from "./controllers/partie.controller";
 import { EquipeController } from "./controllers/equipe.controller";
+import { Server } from "socket.io";
 
 export class App {
   app: Application;
@@ -15,6 +16,8 @@ export class App {
   httpServer: any;
   upload: any;
 
+  io: Server;
+
   constructor() {
     this.app = express();
     this.httpServer = createServer(this.app);
@@ -23,6 +26,13 @@ export class App {
     this.equipeController = new EquipeController();
     this.config();
     this.configureStorage();
+    this.io = new Server(this.httpServer, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      },
+    });
     this.routes();
   }
 
@@ -243,6 +253,29 @@ export class App {
         res.json(true);
       } catch (error) {
         console.error("Erreur lors de la connexion de l'équipe :", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    //REPONSE
+    this.app.put("/reponse/", async (req, res) => {
+      try {
+        const annee = JSON.parse(req.body.annee);
+        const marge = JSON.parse(req.body.marge);
+        this.io.emit("update-reponse", { annee, marge });
+        res.json(true);
+      } catch (error) {
+        console.error("Erreur lors de la confirmation de la réponse", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    this.app.put("/reponse/confirm", async (req, res) => {
+      try {
+        this.io.emit("confirm-reponse");
+        res.json(true);
+      } catch (error) {
+        console.error("Erreur lors de la confirmation de la réponse", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
