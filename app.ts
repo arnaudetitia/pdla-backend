@@ -257,6 +257,27 @@ export class App {
       }
     });
 
+    this.app.get("/equipes/en-jeu", async (req, res) => {
+      try {
+        const equipeEnJeu = await this.equipeController.getEquipeEnJeu();
+        res.json(equipeEnJeu);
+      } catch (error) {
+        console.error("Erreur lors dedu changement de tour :", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
+    this.app.put("/equipes/changer-tour", async (req, res) => {
+      try {
+        const equipeEnJeu = await this.equipeController.changerTour();
+        this.io.emit("nouvelle-equipe-en-jeu", { equipeEnJeu });
+        res.json(true);
+      } catch (error) {
+        console.error("Erreur lors dedu changement de tour :", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
     //REPONSE
     this.app.put("/reponse/", async (req, res) => {
       try {
