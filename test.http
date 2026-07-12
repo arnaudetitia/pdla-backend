@@ -13,3 +13,11 @@ Content-Type: application/json
 ### Récupération des équipes
 GET http://localhost:3030/equipes
 Content-Type: application/json
+
+### Changement Tour et recupération de la nouvelle equipe en jeu
+PUT http://localhost:3030/equipes/changer-tour
+Content-Type: application/json
+
+### Récupération de l'équipe en jeu
+GET http://localhost:3030/equipes/en-jeu
+Content-Type: application/json

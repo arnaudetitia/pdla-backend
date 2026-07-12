@@ -10,10 +10,10 @@ export class EquipeController {
       for (const [index, equipe] of equipes.entries()) {
         await pool.query({
           text: `
-                INSERT INTO pdla.equipes(nom_equipe, ordre)
+                INSERT INTO pdla.equipes(nom_equipe, en_jeu)
                 VALUES ($1, $2)
                 `,
-          values: [equipe, index + 1],
+          values: [equipe, index === 0],
         });
       }
 
@@ -51,6 +51,43 @@ export class EquipeController {
         values: [nomEquipe],
       });
       return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async changerTour() {
+    const pool = database.Database.getPool();
+    try {
+      const result = await pool.query({
+        text: `
+        WITH maj AS (
+        	UPDATE pdla.equipes
+        	SET en_jeu = NOT en_jeu
+        	RETURNING nom_equipe, en_jeu
+        ) 
+        SELECT nom_equipe AS equipe_en_jeu
+        FROM maj
+        WHERE en_jeu
+        `,
+      });
+      return result.rows ? result.rows[0]["equipe_en_jeu"] : "";
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async getEquipeEnJeu() {
+    const pool = database.Database.getPool();
+    try {
+      const result = await pool.query({
+        text: `
+        SELECT e.nom_equipe AS equipe_en_jeu
+        FROM pdla.equipes e
+        WHERE e.en_jeu
+        `,
+      });
+      return result.rows ? result.rows[0]["equipe_en_jeu"] : "";
     } catch (error) {
       throw error;
     }
