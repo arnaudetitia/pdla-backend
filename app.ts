@@ -224,6 +224,19 @@ export class App {
       }
     });
 
+    this.app.put("/partie/fin", async (req, res) => {
+      try {
+        this.io.emit("partie-termine");
+        res.json(true);
+      } catch (error) {
+        console.error(
+          "Erreur lors du déclenchement de la fin d'une partie:",
+          error,
+        );
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
     //EQUIPES
     this.app.get("/equipes", async (req, res) => {
       try {
