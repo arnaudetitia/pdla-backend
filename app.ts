@@ -25,7 +25,6 @@ export class App {
     this.partieController = new PartieController();
     this.equipeController = new EquipeController();
     this.config();
-    this.configureStorage();
     this.io = new Server(this.httpServer, {
       cors: {
         origin: "*",
@@ -33,11 +32,12 @@ export class App {
         allowedHeaders: ["Content-Type", "Authorization"],
       },
     });
+    this.configureStorage();
     this.routes();
   }
 
   private config() {
-    this.app.use(cors({}));
+    this.app.use(cors({ exposedHeaders: ["ngrok-skip-browser-warning"] }));
     this.app.use(express.json());
   }
 
@@ -326,6 +326,17 @@ export class App {
         console.error("Erreur lors de la confirmation de la réponse", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
+    });
+
+    const distPath = path.join(
+      __dirname,
+      "../../../Projets Angular/pdla-remote/dist/pdla-remote/browser",
+    );
+
+    this.app.use(express.static(distPath));
+
+    this.app.use((req, res, next) => {
+      res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
