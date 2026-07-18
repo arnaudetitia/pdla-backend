@@ -224,6 +224,20 @@ export class App {
       }
     });
 
+    this.app.put("/partie/toggle-votes", async (req, res) => {
+      try {
+        const statusVotes = JSON.parse(req.body.statusVotes);
+        this.io.emit("toggle-votes", { statusVotes });
+        res.json(true);
+      } catch (error) {
+        console.error(
+          "Erreur lors du déclenchement de l'ouverture des votes:",
+          error,
+        );
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
+
     this.app.put("/partie/fin", async (req, res) => {
       try {
         this.io.emit("partie-termine");
