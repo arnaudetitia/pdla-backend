@@ -327,17 +327,6 @@ export class App {
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
-
-    // const distPath = path.join(
-    //   __dirname,
-    //   "../../../Projets Angular/pdla-remote/dist/pdla-remote/browser",
-    // );
-
-    // this.app.use(express.static(distPath));
-
-    // this.app.use((req, res, next) => {
-    //   res.sendFile(path.join(distPath, "index.html"));
-    // });
   }
 
   public listen(port: number): void {
