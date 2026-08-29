@@ -37,7 +37,26 @@ export class App {
   }
 
   private config() {
-    this.app.use(cors({ exposedHeaders: ["ngrok-skip-browser-warning"] }));
+    const allowedOrigins = [
+      "https://localhost:4200",
+      "https://localhost:4190",
+      "https://pdla-remote.onrender.com",
+      "https://pdla-host.onrender.com",
+    ];
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          if (process.env.NODE_ENV === "prod") {
+            if (origin && allowedOrigins.includes(origin)) callback(null, true);
+            else {
+              callback(new Error("Interdit"));
+            }
+          } else {
+            callback(null, true);
+          }
+        },
+      }),
+    );
     this.app.use(express.json());
   }
 
@@ -326,6 +345,13 @@ export class App {
         console.error("Erreur lors de la confirmation de la réponse", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
+    });
+
+    this.app.post("/admin", async (req, res) => {
+      if (req.body.mdpAdmin.localeCompare(process.env.ADMIN_PASSWORD) === 0) {
+        return res.status(200).json({ success: true });
+      }
+      return res.status(403).json({ error: "Mot de passe incorrect" });
     });
   }
 
