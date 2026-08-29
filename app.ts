@@ -37,7 +37,26 @@ export class App {
   }
 
   private config() {
-    this.app.use(cors({ exposedHeaders: ["ngrok-skip-browser-warning"] }));
+    const allowedOrigins = [
+      "https://localhost:4200",
+      "https://localhost:4190",
+      "https://pdla-remote.onrender.com",
+      "https://pdla-host.onrender.com",
+    ];
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          if (process.env.NODE_ENV === "prod") {
+            if (origin && allowedOrigins.includes(origin)) callback(null, true);
+            else {
+              callback(new Error("Interdit"));
+            }
+          } else {
+            callback(null, true);
+          }
+        },
+      }),
+    );
     this.app.use(express.json());
   }
 
