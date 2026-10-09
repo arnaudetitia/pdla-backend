@@ -62,21 +62,7 @@ export class App {
 
   configureStorage() {
     const multer = require("multer");
-    const storage = multer.diskStorage({
-      destination: function (req: any, file: any, cb: any) {
-        cb(
-          null,
-          path.join(
-            __dirname,
-            "../../../Projets Angular/pdla-frontend/src/assets/extraits/",
-          ),
-        );
-      },
-      filename: function (req: any, file: any, cb: any) {
-        cb(null, file.originalname);
-      },
-    });
-    this.upload = multer({ storage: storage });
+    this.upload = multer({ storage: multer.memoryStorage() });
   }
 
   private routes(): void {
@@ -105,6 +91,22 @@ export class App {
       async (req, res) => {
         try {
           const newQuestion = JSON.parse(req.body.question);
+          const musicFile = (
+            req as typeof req & {
+              file?: { originalname: string; buffer: Buffer };
+            }
+          ).file;
+          if (musicFile) {
+            if (path.extname(musicFile.originalname).toLowerCase() !== ".mp3") {
+              return res.status(400).json({ error: "Le fichier doit être un MP3" });
+            }
+            newQuestion.musique =
+              newQuestion.musique || path.parse(musicFile.originalname).name;
+            await this.questionController.uploadMusic(
+              newQuestion.musique,
+              musicFile.buffer,
+            );
+          }
           await this.questionController.insertNewQuestion(newQuestion);
           const allQuestions = await this.questionController.getAllQuestions();
           res.json(
@@ -133,6 +135,22 @@ export class App {
         try {
           const idQuestion = Number(req.params.id);
           const editedQuestion = JSON.parse(req.body.question);
+          const musicFile = (
+            req as typeof req & {
+              file?: { originalname: string; buffer: Buffer };
+            }
+          ).file;
+          if (musicFile) {
+            if (path.extname(musicFile.originalname).toLowerCase() !== ".mp3") {
+              return res.status(400).json({ error: "Le fichier doit être un MP3" });
+            }
+            editedQuestion.musique =
+              editedQuestion.musique || path.parse(musicFile.originalname).name;
+            await this.questionController.uploadMusic(
+              editedQuestion.musique,
+              musicFile.buffer,
+            );
+          }
           await this.questionController.editQuestion(
             idQuestion,
             editedQuestion,
