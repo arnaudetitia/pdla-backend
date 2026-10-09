@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import { ErreurImportFichier } from "../models/erreur-import-fichier.model";
 import { CsvReaderUtil } from "../utils/csv-reader.util";
 import { CsvPdlaColumns } from "../utils/enums/csv-pdla-columns.enum";
+import { SupabaseStorageUtil } from "../utils/supabase-storage.util";
 
 export class QuestionController {
   public async getAllQuestions() {
@@ -51,6 +52,10 @@ export class QuestionController {
         question.musique,
       ],
     });
+  }
+
+  public async uploadMusic(musicName: string, content: Buffer) {
+    await SupabaseStorageUtil.uploadMusic(musicName, content);
   }
 
   public async importQuestions(csvContent: string, doImport: boolean) {
