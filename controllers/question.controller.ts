@@ -1,8 +1,8 @@
 import database = require("../database");
-import * as fs from "fs/promises";
 import { ErreurImportFichier } from "../models/erreur-import-fichier.model";
 import { CsvReaderUtil } from "../utils/csv-reader.util";
 import { CsvPdlaColumns } from "../utils/enums/csv-pdla-columns.enum";
+import { SupabaseStorageUtil } from "../utils/supabase-storage.util";
 
 export class QuestionController {
   public async getAllQuestions() {
@@ -53,15 +53,15 @@ export class QuestionController {
     });
   }
 
+  public async uploadMusic(musicName: string, content: Buffer) {
+    await SupabaseStorageUtil.uploadMusic(musicName, content);
+  }
+
   public async importQuestions(csvContent: string, doImport: boolean) {
     const records = await CsvReaderUtil.parseRecords(csvContent);
     const erreurs: ErreurImportFichier[] = [];
 
-    const MUSIC_FOLDER_SRC = "E:\\Jeux Arnaud\\Pile dans l'année\\Extraits";
-    const MUSIC_FOLDER_TARGET =
-      "E:\\Projets Angular\\pdla-frontend\\src\\assets\\extraits";
-    const musicFilesToCopy: { src: string; dest: string }[] = [];
-
+    const listeChansons = await SupabaseStorageUtil.getAllMusicInBucket();
     for (const [index, record] of records.entries()) {
       if (!record[CsvPdlaColumns.QUESTION]) {
         erreurs.push({
@@ -88,16 +88,16 @@ export class QuestionController {
       }
 
       if (record[CsvPdlaColumns.MUSIQUE]) {
-        const extraitPath = `${MUSIC_FOLDER_SRC}\\${record[CsvPdlaColumns.MUSIQUE]}.mp3`;
-        try {
-          await fs.access(extraitPath);
-          const targetPath = `${MUSIC_FOLDER_TARGET}\\${record[CsvPdlaColumns.MUSIQUE]}.mp3`;
-          musicFilesToCopy.push({ src: extraitPath, dest: targetPath });
-        } catch (error) {
+        if (
+          listeChansons.every(
+            (extrait) =>
+              extrait.localeCompare(record[CsvPdlaColumns.MUSIQUE]) !== 0,
+          )
+        ) {
           erreurs.push({
             ligne: index + 1,
-            type: "error",
-            message: `Le fichier ${extraitPath} n'existe pas`,
+            type: "warning",
+            message: `L'extrait ${record[CsvPdlaColumns.MUSIQUE]}.mp3 n'est pas dans le storage distant`,
           });
         }
       }
@@ -113,12 +113,6 @@ export class QuestionController {
         };
 
         await this.insertNewQuestion(questionVo);
-      }
-
-      await fs.mkdir(MUSIC_FOLDER_TARGET, { recursive: true });
-
-      for (const musicFile of musicFilesToCopy) {
-        await fs.copyFile(musicFile.src, musicFile.dest);
       }
     }
 
