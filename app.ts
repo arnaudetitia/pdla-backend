@@ -38,8 +38,8 @@ export class App {
 
   private config() {
     const allowedOrigins = [
-      "https://localhost:4200",
-      "https://localhost:4190",
+      "http://localhost:4200",
+      "http://localhost:4190",
       "https://pdla-remote.onrender.com",
       "https://pdla-host.onrender.com",
     ];
@@ -66,6 +66,20 @@ export class App {
   }
 
   private routes(): void {
+    //HEALTH
+
+    this.app.get("/health", async (req, res) => {
+      return res.status(200).json(true);
+    });
+
+    // ADMIN
+    this.app.post("/admin", async (req, res) => {
+      if (req.body.mdpAdmin.localeCompare(process.env.ADMIN_PASSWORD) === 0) {
+        return res.status(200).json({ success: true });
+      }
+      return res.status(403).json({ error: "Mot de passe incorrect" });
+    });
+
     // QUESTIONS
     this.app.get("/questions", async (req, res) => {
       try {
@@ -98,7 +112,9 @@ export class App {
           ).file;
           if (musicFile) {
             if (path.extname(musicFile.originalname).toLowerCase() !== ".mp3") {
-              return res.status(400).json({ error: "Le fichier doit être un MP3" });
+              return res
+                .status(400)
+                .json({ error: "Le fichier doit être un MP3" });
             }
             newQuestion.musique =
               newQuestion.musique || path.parse(musicFile.originalname).name;
@@ -142,7 +158,9 @@ export class App {
           ).file;
           if (musicFile) {
             if (path.extname(musicFile.originalname).toLowerCase() !== ".mp3") {
-              return res.status(400).json({ error: "Le fichier doit être un MP3" });
+              return res
+                .status(400)
+                .json({ error: "Le fichier doit être un MP3" });
             }
             editedQuestion.musique =
               editedQuestion.musique || path.parse(musicFile.originalname).name;
@@ -363,13 +381,6 @@ export class App {
         console.error("Erreur lors de la confirmation de la réponse", error);
         res.status(500).json({ error: "Erreur serveur" });
       }
-    });
-
-    this.app.post("/admin", async (req, res) => {
-      if (req.body.mdpAdmin.localeCompare(process.env.ADMIN_PASSWORD) === 0) {
-        return res.status(200).json({ success: true });
-      }
-      return res.status(403).json({ error: "Mot de passe incorrect" });
     });
   }
 
