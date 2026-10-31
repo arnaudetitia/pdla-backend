@@ -92,4 +92,9 @@ export class EquipeController {
       throw error;
     }
   }
+
+  public async supprimerEquipes() {
+    const pool = database.Database.getPool();
+    await pool.query("TRUNCATE TABLE pdla.equipes");
+  }
 }
