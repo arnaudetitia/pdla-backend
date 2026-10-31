@@ -295,6 +295,7 @@ export class App {
 
     this.app.put("/partie/fin", async (req, res) => {
       try {
+        await this.equipeController.supprimerEquipes();
         this.io.emit("partie-termine");
         res.json(true);
       } catch (error) {
